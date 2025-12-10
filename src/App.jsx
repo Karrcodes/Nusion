@@ -21,13 +21,18 @@ function App() {
     setKey(prev => prev + 1);
 
     // 2. Generate Image (Async)
+    const prompt = `${newCombo.description}, delicious food, vibrant, professional photography, 8k`;
+
     try {
-      const prompt = `${newCombo.description}, delicious food, vibrant, professional photography, 8k`;
       const url = await generateImage(prompt);
       setImageUrl(url);
     } catch (err) {
-      console.error("Failed to generate image:", err);
-      setError("Visual Generation Failed. Check API Key.");
+      console.error("Failed to generate image with Fal.ai:", err);
+      // Fallback to Pollinations.ai since Fal.ai quota likely exceeded
+      const seed = Math.floor(Math.random() * 1000000);
+      const encodedPrompt = encodeURIComponent(prompt);
+      const fallbackUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true`;
+      setImageUrl(fallbackUrl);
     } finally {
       setLoading(false);
     }
