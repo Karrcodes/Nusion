@@ -104,6 +104,14 @@ h3 {
   line-height: 1.4;
 }
 
+.context-text {
+  font-size: 1rem !important;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  max-width: 90%;
+  opacity: 0.9;
+}
+
 .project-credit {
   font-size: 1.3rem !important;
   margin-top: 4rem;
@@ -400,7 +408,7 @@ h3 {
 
   .container {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 1.5rem;
     padding-top: 6rem;
     /* Ensure top padding exists */
     padding-left: 0.75rem;
@@ -421,7 +429,7 @@ h3 {
     text-align: center;
     justify-self: center;
     max-width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .header h1 {
@@ -433,7 +441,7 @@ h3 {
   }
 
   .project-credit {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
   }
 
   .generator-wrapper {
@@ -441,6 +449,7 @@ h3 {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-top: 0;
   }
 
   .card {

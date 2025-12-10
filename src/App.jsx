@@ -58,6 +58,9 @@ function App() {
         <header className="header">
           <div className="logo-gradient"></div>
           <p>West Africa meets Japan in a culinary experiment.</p>
+          <p className="context-text">
+            Nusion is a creative engine that generates hypothetical fusion cuisine. It uses AI to combine authentic West African ingredients with traditional Japanese cooking styles, creating unique dish concepts and visualizing them in real-time.
+          </p>
           <p className="project-credit">A <a href="https://studioaikinkarr.framer.website" target="_blank" rel="noopener noreferrer" className="credit-link"><strong>Studio Aikin Karr</strong></a> Project</p>
         </header>
 
