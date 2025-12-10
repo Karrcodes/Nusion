@@ -38,7 +38,7 @@ function App() {
     <div className="app-wrapper">
       <div className="container">
         <header className="header">
-          <h1>Flavour Fusion</h1>
+          <div className="logo-gradient"></div>
           <p>West Africa meets Japan in a culinary experiment.</p>
           <p className="project-credit">A <strong>Studio Aikin Karr</strong> Project</p>
         </header>
