@@ -56,12 +56,16 @@ h3 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
+  align-content: center;
+  /* Vertically center the grid content */
   gap: 4rem;
   width: 100%;
   max-width: 1400px;
   padding: 2rem 4rem;
-  margin: auto;
-  /* Centers vertically and horizontally in flex wrapper */
+  margin: 0 auto;
+  /* Center horizontally */
+  flex-grow: 1;
+  /* Take up available space for vertical centering */
 }
 
 .header {
@@ -314,7 +318,7 @@ h3 {
   opacity: 0.7;
   text-align: center;
   width: 100%;
-  margin-top: auto;
+  /* margin-top: auto; Removed as container now grows */
 }
 
 /* Mobile / Tablet Optimization */
@@ -322,7 +326,8 @@ h3 {
   .container {
     grid-template-columns: 1fr;
     gap: 3rem;
-    padding: 2rem 1.5rem;
+    padding: 6rem 1.5rem 2rem 1.5rem;
+    /* Added top padding for mobile */
     text-align: center;
     margin: 0 auto;
     flex: 1;
