@@ -79,10 +79,10 @@ h3 {
 
 .logo-gradient {
   width: 100%;
-  max-width: 400px;
-  /* Adjust as needed */
-  height: 120px;
-  /* Adjust based on logo aspect ratio */
+  max-width: 300px;
+  /* Reduced size for sharpness */
+  height: 90px;
+  /* Reduced size for sharpness */
   background: linear-gradient(120deg, var(--text-primary), var(--accent-wa), var(--accent-jp), var(--accent-fusion), var(--text-primary));
   background-size: 300%;
   -webkit-mask-image: url('/logo.png');
