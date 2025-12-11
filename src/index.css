@@ -427,7 +427,6 @@ h3 {
   color: var(--text-secondary);
   font-size: 0.9rem;
   opacity: 0.7;
-  text-align: left;
   /* User requested left alignment */
   position: absolute;
   /* Remove from flow to allow true centering */
@@ -439,6 +438,9 @@ h3 {
   z-index: 10;
   background: transparent;
   /* Ensure wallpaper shows through */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .footer p {
@@ -471,8 +473,10 @@ h3 {
     /* Push to bottom naturally */
     pointer-events: auto;
     /* Normal interaction in flow */
-    text-align: center;
     /* Center-align on mobile */
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   .container {

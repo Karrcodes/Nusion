@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { generateCombo } from './utils/generator';
 import { generateImage } from './utils/fal';
+import versionData from './version.json';
 
 function App() {
   const [combo, setCombo] = useState(null);
@@ -239,6 +240,7 @@ function App() {
       </div>
       <footer className="footer">
         <p>&copy; Studio Aikin Karr 2026</p>
+        <p>v{versionData.version}</p>
       </footer>
     </div >
   );
