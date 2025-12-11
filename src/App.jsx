@@ -9,9 +9,11 @@ function App() {
   const [imageUrl, setImageUrl] = useState(''); // State for async image URL
   const [error, setError] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleGenerate = async () => {
     setLoading(true);
+    setProgress(0);
     setError(null);
     setImageUrl(''); // Clear previous image
     setImageLoaded(false);
@@ -27,6 +29,7 @@ function App() {
     try {
       const url = await generateImage(prompt);
       setImageUrl(url);
+      // Don't set progress to 100 here; wait for image load
     } catch (err) {
       console.error("Failed to generate image with Fal.ai:", err);
       // Fallback to Pollinations.ai (using fast 'flux' model)
@@ -34,10 +37,32 @@ function App() {
       const encodedPrompt = encodeURIComponent(prompt);
       const fallbackUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
       setImageUrl(fallbackUrl);
+      // Don't set progress to 100 here; wait for image load
     } finally {
       setLoading(false);
     }
   };
+
+  // Simulated progress effect
+  useEffect(() => {
+    let interval;
+    const isWorking = loading || (imageUrl && !imageLoaded);
+
+    if (isWorking && progress < 90) {
+      interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(interval);
+            return 90;
+          }
+          // Slower increment as we get closer
+          const increment = Math.max(0.5, (90 - prev) / 20);
+          return prev + increment;
+        });
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [loading, imageUrl, imageLoaded, progress]);
 
   // Reset image loaded state when combo changes
   useEffect(() => {
@@ -62,10 +87,16 @@ function App() {
               {combo ? (
                 <div key={key} className="animate-in">
                   <div className={`image-container ${loading || (!imageLoaded && imageUrl) ? 'loading' : ''}`}>
-                    {loading && <div className="img-placeholder">Generating Visual...</div>}
+                    {(loading || (!imageLoaded && imageUrl)) && (
+                      <div className="img-placeholder">
+                        <p>{loading ? 'Mixing Flavors...' : 'Plating Dish...'}</p>
+                        <div className="progress-container">
+                          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+                        </div>
+                      </div>
+                    )}
                     {!loading && error && <div className="img-placeholder error" style={{ color: 'var(--accent-wa)' }}>{error}</div>}
                     {!loading && !error && !imageUrl && <div className="img-placeholder">Prepare to Feast</div>}
-                    {!loading && imageUrl && !imageLoaded && <div className="img-placeholder">Loading Image...</div>}
 
                     {/* Show image only if we have a URL */}
                     {imageUrl && (
@@ -73,7 +104,11 @@ function App() {
                         src={imageUrl}
                         alt={combo.title}
                         className={`dish-image ${imageLoaded ? 'visible' : ''}`}
-                        onLoad={() => setImageLoaded(true)}
+                        onLoad={() => {
+                          setProgress(100);
+                          // Small delay to let user see 100% bar before switching
+                          setTimeout(() => setImageLoaded(true), 500);
+                        }}
                         onError={(e) => {
                           console.error("Image failed to load");
                           e.target.style.display = 'none';
