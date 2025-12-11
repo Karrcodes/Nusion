@@ -10,12 +10,14 @@ function App() {
   const [error, setError] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState('idle'); // 'idle', 'analyzing', 'mixing', 'plating'
 
   const handleGenerate = async () => {
     setLoading(true);
+    setLoadingPhase('analyzing');
     setProgress(0);
     setError(null);
-    setImageUrl(''); // Clear previous image
+    setImageUrl('');
     setImageLoaded(false);
 
     // 1. Generate Text Combo
@@ -23,22 +25,49 @@ function App() {
     setCombo(newCombo);
     setKey(prev => prev + 1);
 
-    // 2. Generate Image (Async)
+    // 2. Start Image Gen (Background)
     const prompt = `${newCombo.description}, delicious food, vibrant, professional photography, 8k`;
+    const imagePromise = generateImage(prompt);
 
     try {
-      const url = await generateImage(prompt);
+      // Phase 1: Analyzing (1s)
+      await new Promise(r => setTimeout(r, 1000));
+
+      // Phase 2: Mixing (1s + API wait)
+      setLoadingPhase('mixing');
+      await new Promise(r => setTimeout(r, 1000));
+
+      const url = await imagePromise;
+      setLoadingPhase('plating');
       setImageUrl(url);
-      // Don't set progress to 100 here; wait for image load
+
     } catch (err) {
-      console.error("Failed to generate image with Fal.ai:", err);
-      // Fallback to Pollinations.ai (using fast 'flux' model)
-      const seed = Math.floor(Math.random() * 1000000);
-      const encodedPrompt = encodeURIComponent(prompt);
-      const fallbackUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
-      setImageUrl(fallbackUrl);
-      // Don't set progress to 100 here; wait for image load
+      console.error("Primary generation failed, trying fallback:", err);
+      try {
+        setLoadingPhase('mixing'); // Ensure we are in mixing if failed early
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(prompt);
+        const fallbackUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
+
+        // Ensure some delay if fallback is instant
+        await new Promise(r => setTimeout(r, 1000));
+
+        setLoadingPhase('plating');
+        setImageUrl(fallbackUrl);
+      } catch (fallbackErr) {
+        console.error("Fallback failed:", fallbackErr);
+        setError("Kitchen Overload! Please try again.");
+        setLoading(false);
+        setLoadingPhase('idle');
+      }
     } finally {
+      // Loading state remains true until image loads (handled by onLoad)
+      // We only turn off 'loading' variable when we have the URL, 
+      // but we want to keep the UI in "loading mode" until the image is ready.
+      // Actually, my previous logic used `loading` variable for the API part.
+      // Let's keep `loading = false` here but `loadingPhase` controls the UI text/icon?
+      // The previous render logic was: `loading || (!imageLoaded && imageUrl)`.
+      // This still holds true. `loading` is for the API/Process.
       setLoading(false);
     }
   };
@@ -89,7 +118,16 @@ function App() {
                   <div className={`image-container ${loading || (!imageLoaded && imageUrl) ? 'loading' : ''}`}>
                     {(loading || (!imageLoaded && imageUrl)) && (
                       <div className="img-placeholder">
-                        <p>{loading ? 'Mixing Flavors...' : 'Plating Dish...'}</p>
+                        <div className="loading-icon">
+                          {loadingPhase === 'analyzing' && '🔬'}
+                          {loadingPhase === 'mixing' && '🌪️'}
+                          {(loadingPhase === 'plating' || (!loading && !imageLoaded)) && '🍽️'}
+                        </div>
+                        <p>
+                          {loadingPhase === 'analyzing' && 'Analyzing Composition...'}
+                          {loadingPhase === 'mixing' && 'Synthesizing Flavors...'}
+                          {(loadingPhase === 'plating' || (!loading && !imageLoaded)) && 'Plating Dish...'}
+                        </p>
                         <div className="progress-container">
                           <div className="progress-bar" style={{ width: `${progress}%` }}></div>
                         </div>
@@ -119,37 +157,52 @@ function App() {
                   </div>
 
                   <div className="card-body">
-                    <h2 className="dish-title">{combo.title}</h2>
-                    <p className="dish-desc">{combo.description}</p>
-
-                    <div className="tags">
-                      <span className="tag wa">{combo.ingredients[0].name}</span>
-                      <span className="tag jp">{combo.ingredients[1].name}</span>
-                      <span className="tag style">{combo.style}</span>
-                    </div>
-
-                    {combo.nutrition && (
-                      <div className="nutrition-facts">
-                        <h3>Estimated Nutrition</h3>
-                        <div className="nutrition-grid">
-                          <div className="nut-item">
-                            <span className="nut-value">{combo.nutrition.calories}</span>
-                            <span className="nut-label">Calories</span>
-                          </div>
-                          <div className="nut-item">
-                            <span className="nut-value">{combo.nutrition.protein}g</span>
-                            <span className="nut-label">Protein</span>
-                          </div>
-                          <div className="nut-item">
-                            <span className="nut-value">{combo.nutrition.carbs}g</span>
-                            <span className="nut-label">Carbs</span>
-                          </div>
-                          <div className="nut-item">
-                            <span className="nut-value">{combo.nutrition.fat}g</span>
-                            <span className="nut-label">Fat</span>
-                          </div>
+                    {loading || (!imageLoaded && imageUrl) ? (
+                      <>
+                        <div className="skeleton title"></div>
+                        <div className="skeleton text"></div>
+                        <div className="skeleton text" style={{ width: '60%' }}></div>
+                        <div className="tags">
+                          <div className="skeleton tag"></div>
+                          <div className="skeleton tag"></div>
+                          <div className="skeleton tag"></div>
                         </div>
-                      </div>
+                      </>
+                    ) : (
+                      <>
+                        <h2 className="dish-title">{combo.title}</h2>
+                        <p className="dish-desc">{combo.description}</p>
+
+                        <div className="tags">
+                          <span className="tag wa">{combo.ingredients[0].name}</span>
+                          <span className="tag jp">{combo.ingredients[1].name}</span>
+                          <span className="tag style">{combo.style}</span>
+                        </div>
+
+                        {combo.nutrition && (
+                          <div className="nutrition-facts">
+                            <h3>Estimated Nutrition</h3>
+                            <div className="nutrition-grid">
+                              <div className="nut-item">
+                                <span className="nut-value">{combo.nutrition.calories}</span>
+                                <span className="nut-label">Calories</span>
+                              </div>
+                              <div className="nut-item">
+                                <span className="nut-value">{combo.nutrition.protein}g</span>
+                                <span className="nut-label">Protein</span>
+                              </div>
+                              <div className="nut-item">
+                                <span className="nut-value">{combo.nutrition.carbs}g</span>
+                                <span className="nut-label">Carbs</span>
+                              </div>
+                              <div className="nut-item">
+                                <span className="nut-value">{combo.nutrition.fat}g</span>
+                                <span className="nut-label">Fat</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

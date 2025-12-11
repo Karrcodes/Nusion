@@ -202,6 +202,27 @@ h3 {
 .img-placeholder {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.loading-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-5px);
+  }
 }
 
 .dish-image {
@@ -523,11 +544,12 @@ h3 {
 
 /* Progress Bar - Global */
 .progress-container {
-  width: 100%;
+  width: 80%;
+  max-width: 240px;
   height: 6px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(139, 94, 60, 0.2);
   border-radius: 99px;
-  margin-top: 1rem;
+  margin: 1rem auto 0 auto;
   overflow: hidden;
   position: relative;
 }
@@ -576,4 +598,40 @@ h3 {
 .initial-state-card p {
   font-size: 1.1rem;
   color: var(--text-secondary);
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, rgba(194, 168, 120, 0.1), rgba(194, 168, 120, 0.3), rgba(194, 168, 120, 0.1));
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeleton.title {
+  height: 2.5rem;
+  width: 60%;
+  margin-bottom: 1rem;
+}
+
+.skeleton.text {
+  height: 1.1rem;
+  width: 80%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton.tag {
+  height: 2rem;
+  width: 80px;
+  border-radius: 100px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
